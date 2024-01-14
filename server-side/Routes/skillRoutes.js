@@ -15,7 +15,7 @@ router.post('/skills', authenticateToken, async (req, res) => {
       return res.send({ message: 'Unauthorized'});
     }
 
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     
     const newSkillData = {

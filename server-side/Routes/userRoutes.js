@@ -47,7 +47,11 @@ router.post('/login', async (req, res) => {
         return res.send({ message:'Wrong username or password'});
       }
         const token = jwt.sign({ id: user._id }, "Mvp project");
-        res.send({ userId : user._id, token : token, message: 'Login is successful'});
+
+        const userResponse = { ...user.toObject()};
+        delete userResponse.password;
+
+        res.send({ user : userResponse, token : token, message: 'Login is successful'});
     });
 });
 
