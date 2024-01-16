@@ -33,17 +33,17 @@ router.post('/skills', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/skills', async (req, res) => {
+router.get('/skills', authenticateToken, async (req, res) => {
   try {
-    const skills = await Skill.find({});
+    const userId = req.user.id;
+    const skills = await Skill.find({createdBy: userId});
     res.status(200).send(skills);
   } catch (error) {
-    console.error(error);
-    res.send({ message: 'Error fetching the skills '});
+    res.status(500).send({ message: 'Error fetching the skills '});
   }
 });
 
-router.get('/skills/:id',  async (req, res) => {
+router.get('/skills/:id', async (req, res) => {
   try {
     const id = req.params.id;
     const skill = await Skill.findById(id);
@@ -78,17 +78,20 @@ router.put('/skills/:id', authenticateToken, async (req, res) => {
 
 router.delete('/skills/:id', authenticateToken, async (req, res) => {
   try {
-    const id = req.params.id;
-    const deletedSkill = await Skill.findByIdAndDelete(id);
+    const skillId = req.params.id;
+    const userId = req.user.id;
+    const skill = await Skill.findOne({ _id: skillId, createdBy: userId});
 
-    if(!deletedSkill){
-      return res.send({ message: 'Skill not found'});
+    if(!skill) {
+      return res.status(403).send({ message: 'Unauthorized to delete this skill'});
     }
+
+    const deletedSkill = await Skill.findByIdAndDelete({ _id: skillId });
 
     res.send({ message: 'Skill deleted successfully'});
   } catch (error) {
     console.error(error); // for debugging do not forget to add this always
-    res.send({ message: 'Skill could not be deleted'});
+    res.status(500).send({ message: 'Error deleting skill'});
   }
 });
 
